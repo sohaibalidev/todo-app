@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import { Platform } from 'react-native';
 
 type AuthContextData = {
   session: Session | null;
@@ -30,13 +31,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         await GoogleSignin.configure({
           webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+          iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
           offlineAccess: true,
-          scopes: ['profile', 'email'],
         });
-        console.log('Google Sign-In configured');
 
         const { data: { session } } = await supabase.auth.getSession();
         setSession(session);
+
       } catch (error) {
         console.error('Initialization error:', error);
       } finally {
@@ -46,7 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     initializeAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
     });
 
@@ -55,22 +56,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInWithGoogle = async () => {
     try {
-      console.log('Starting Google Sign-In...');
-
-      await GoogleSignin.hasPlayServices();
+      if (Platform.OS === 'android') {
+        await GoogleSignin.hasPlayServices();
+      }
 
       await GoogleSignin.signOut();
 
-      const response = await GoogleSignin.signIn();
-      console.log('Google Sign-In response received');
+      const userInfo = await GoogleSignin.signIn();
 
-      const idToken = response.data?.idToken;
+      const idToken = userInfo.data?.idToken;
 
       if (!idToken) {
-        throw new Error('No ID token received');
+        throw new Error('No ID token received from Google');
       }
-
-      console.log('Got ID token, signing into Supabase...');
 
       const { data, error } = await supabase.auth.signInWithIdToken({
         provider: 'google',
@@ -79,27 +77,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) throw error;
 
-      console.log('Successfully signed in to Supabase');
-
     } catch (error: any) {
-      console.error('Sign-in error details:', {
-        code: error.code,
+      console.error('Sign-in error:', {
         message: error.message,
-        error: error
+        code: error.code,
       });
 
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        console.log('User cancelled sign in');
+        throw new Error('Sign in was cancelled');
       } else if (error.code === statusCodes.IN_PROGRESS) {
-        console.log('Sign in already in progress');
+        throw new Error('Sign in already in progress');
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        console.log('Play Services not available');
-      } else if (error.message?.includes('A non-recoverable sign in failure')) {
-        console.log('Configuration error - check Google Cloud Console');
+        throw new Error('Play Services not available');
       } else {
-        console.log('Other error:', error);
+        throw new Error(error.message || 'Failed to sign in with Google');
       }
-      throw error;
     }
   };
 
@@ -110,7 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         supabase.auth.signOut()
       ]);
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('❌ Error signing out:', error);
       throw error;
     }
   };

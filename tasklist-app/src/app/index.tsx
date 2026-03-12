@@ -7,14 +7,10 @@ export default function Index() {
   const { user, isLoading } = useAuth();
 
   useEffect(() => {
-    console.log("Index useEffect - Auth state:", { user, isLoading });
-    
     if (!isLoading) {
       if (user) {
-        console.log("User found, redirecting to app");
         router.replace("/(app)");
       } else {
-        console.log("No user, redirecting to login");
         router.replace("/(auth)/login");
       }
     }

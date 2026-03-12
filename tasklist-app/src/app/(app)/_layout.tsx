@@ -1,28 +1,13 @@
 import { Tabs } from "expo-router";
 import { Feather } from "@expo/vector-icons";
-import { TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../../context/auth-context';
-import { useRouter } from 'expo-router';
 
 export default function AppLayout() {
-  const { signOut } = useAuth();
-  const router = useRouter();
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      router.replace('/(auth)/login');
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
-
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: "#007AFF",
         tabBarInactiveTintColor: "#8E8E93",
+        headerShown: false,
         tabBarStyle: {
           backgroundColor: "#FFFFFF",
           borderTopWidth: 1,
@@ -37,30 +22,15 @@ export default function AppLayout() {
           tabBarIcon: ({ color, size }) => (
             <Feather name="home" size={size} color={color} />
           ),
-          headerRight: () => (
-            <TouchableOpacity onPress={handleSignOut} style={{ marginRight: 15 }}>
-              <Ionicons name="log-out-outline" size={24} color="#dc3545" />
-            </TouchableOpacity>
-          ),
         }}
       />
 
       <Tabs.Screen
-        name="search"
+        name="all-tasks"
         options={{
-          title: "Search",
+          title: "All Tasks",
           tabBarIcon: ({ color, size }) => (
-            <Feather name="search" size={size} color={color} />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="create"
-        options={{
-          title: "Add",
-          tabBarIcon: ({ color, size }) => (
-            <Feather name="plus-circle" size={size} color={color} />
+            <Feather name="list" size={size} color={color} />
           ),
         }}
       />
@@ -72,6 +42,20 @@ export default function AppLayout() {
           tabBarIcon: ({ color, size }) => (
             <Feather name="settings" size={size} color={color} />
           ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="project/[id]"
+        options={{
+          href: null, 
+        }}
+      />
+
+      <Tabs.Screen
+        name="modal/create-task"
+        options={{
+          href: null,
         }}
       />
     </Tabs>
