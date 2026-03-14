@@ -229,7 +229,13 @@ Configure build:
 eas build:configure
 ```
 
-Set production secrets:
+Set secrets:
+
+```bash
+eas env:push --environment preview
+```
+
+or
 
 ```bash
 eas env:push --environment production

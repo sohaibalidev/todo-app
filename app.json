@@ -7,7 +7,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -19,10 +19,11 @@
       "bundleIdentifier": "com.sohaibalidev.tasklist"
     },
     "android": {
+      "package": "com.sohaibalidev.tasklist",
       "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "package": "com.sohaibalidev.tasklist"
+      }
     },
     "plugins": [
       "expo-router",
