@@ -24,7 +24,7 @@ export const OfflineProvider: React.FC<{ children: React.ReactNode }> = ({ child
         networkType: 'unknown',
     });
 
-    useEffect(() => {
+    useEffect(() => { 
         checkNetworkState();
 
         const subscription = Network.addNetworkStateListener((state) => {
